@@ -63,3 +63,5 @@ target/
 
 # Customize output
 output/
+debug/
+.DS_Store

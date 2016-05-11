@@ -189,10 +189,6 @@ def getHotTopic(name, url, website_id, category_id):
 
         for i in rankLists:
             internal_ranking += 1
-            print '==================================='
-            print i
-
-
             title = i.find('div', class_='title')
             if title is None:
                 continue
