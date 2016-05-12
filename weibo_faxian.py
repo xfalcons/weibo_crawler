@@ -139,26 +139,35 @@ def getFaxian(display, driver, name, url, website_id, category_id):
         pageContent = ''
         js="window.scrollTo(0, document.body.scrollHeight);"
         try:
+            print "Retrive url..."
             driver.get(url)
+            print "Waiting..."
             time.sleep(7)
+            print "Scroll down 1st..."
             driver.execute_script(js)
             time.sleep(4)
+            print "Scroll down 2nd..."
             driver.execute_script(js)
             time.sleep(4)
+            print "Scroll down 3rd..."
             driver.execute_script(js)
             time.sleep(4)
+            print "Locate 'load more' button ..."
             loadmore = driver.find_element_by_class_name("WB_cardmore_noborder")
             if loadmore is not None:
-                print 'Got it'
+                print "Got 'load more' button"
                 loadmore.click()
                 time.sleep(4)
             else:
-                print "Got none"
-                
+                print "Can NOT got 'load more' button"
+
+            print "Scroll down 4th..."
             driver.execute_script(js)
             time.sleep(4)
+            print "Scroll down 5th..."
             driver.execute_script(js)
             time.sleep(4)
+            print "Scroll down 6th..."
             driver.execute_script(js)
             time.sleep(4)
             domHtmlContent = driver.find_element_by_tag_name('html')
@@ -196,10 +205,6 @@ def getFaxian(display, driver, name, url, website_id, category_id):
             #print i
 
             detail = i.find('div', class_='WB_feed_detail')
-            #print detail
-            #if detail is None:
-            #    continue
-
             keyword = detail.find('div', class_='WB_info').find('a')
             if keyword is None:
                 continue
@@ -207,7 +212,6 @@ def getFaxian(display, driver, name, url, website_id, category_id):
                 keyword = keyword.get_text().strip()
 
             content = detail.find('div', class_='WB_text')
-            #print 'Content:', content
             if content is not None:
                 content = content.get_text()
 
@@ -249,11 +253,9 @@ def getFaxian(display, driver, name, url, website_id, category_id):
             # forward_times           string                                      
             # comment_times           string                                      
             # datecol                 string 
-            #data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, like_times, forward_times, comment_times, datecol,)
-            #resultLists.append(data)
+            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, like_times, forward_times, comment_times, datecol,)
+            resultLists.append(data)
 
-    # for idx, val in enumerate(resultLists):
-    #     print idx+1, val
     for rec in resultLists:
         print rec
 
