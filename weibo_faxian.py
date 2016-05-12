@@ -40,21 +40,6 @@ def main():
     global DEBUG
     DEBUG = options.debug
 
-#热门微博排行-综艺类
-weibo_hot_variety||01,00=http://d.weibo.com/102803_ctg1_4688_-_ctg1_4688?from=faxian_hot&mod=fenlei# 
-
-#热门微博排行-明星类
-weibo_hot_star||01,01=http://d.weibo.com/102803_ctg1_4288_-_ctg1_4288?from=faxian_hot&mod=fenlei#
-
-#热门微博排行-电视剧类
-weibo_hot_show||01,02=http://d.weibo.com/102803_ctg1_2488_-_ctg1_2488
-
-#热门微博排行-电影类
-weibo_hot_movie||01,03=http://d.weibo.com/102803_ctg1_3288_-_ctg1_3288?from=faxian_hot&mod=fenlei#
-
-#热门微博排行-动漫类
-weibo_hot_comic||01,04=http://d.weibo.com/102803_ctg1_2388_-_ctg1_2388?from=faxian_hot&mod=fenlei#
-
     faxian = {
         'variety' : {
             'name' : 'variety',
