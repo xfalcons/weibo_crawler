@@ -26,7 +26,7 @@ from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 import selenium.webdriver.chrome.service as service
-
+from selenium.webdriver.chrome.options import Options
 
 DEBUG = False
 
@@ -61,10 +61,13 @@ def main():
         },
     }
 
+    opts = Options()
+    opts.add_argument("user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)")
+
     # Prepare display and driver for Chrome headless browser
     display = Display(visible=0, size=(800, 600))
     display.start()
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(chrome_options=opts)
     time.sleep(2)
     # 等待：   
     driver.implicitly_wait(30)
@@ -152,24 +155,24 @@ def getFaxian(display, driver, name, url, website_id, category_id):
             print "Scroll down 3rd..."
             driver.execute_script(js)
             time.sleep(4)
-            print "Locate 'load more' button ..."
-            loadmore = driver.find_element_by_class_name("WB_cardmore_noborder")
-            if loadmore is not None:
-                print "Got 'load more' button"
-                loadmore.click()
-                time.sleep(4)
-            else:
-                print "Can NOT got 'load more' button"
+            # print "Locate 'load more' button ..."
+            # loadmore = driver.find_element_by_class_name("WB_cardmore_noborder")
+            # if loadmore is not None:
+            #     print "Got 'load more' button"
+            #     loadmore.click()
+            #     time.sleep(4)
+            # else:
+            #     print "Can NOT got 'load more' button"
 
-            print "Scroll down 4th..."
-            driver.execute_script(js)
-            time.sleep(4)
-            print "Scroll down 5th..."
-            driver.execute_script(js)
-            time.sleep(4)
-            print "Scroll down 6th..."
-            driver.execute_script(js)
-            time.sleep(4)
+            # print "Scroll down 4th..."
+            # driver.execute_script(js)
+            # time.sleep(4)
+            # print "Scroll down 5th..."
+            # driver.execute_script(js)
+            # time.sleep(4)
+            # print "Scroll down 6th..."
+            # driver.execute_script(js)
+            # time.sleep(4)
             domHtmlContent = driver.find_element_by_tag_name('html')
             # get origin html content
             pageContent = domHtmlContent.get_attribute('innerHTML')
