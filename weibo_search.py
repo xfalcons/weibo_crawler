@@ -27,8 +27,19 @@ from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 import selenium.webdriver.chrome.service as service
 
+# Global debug flag
+DEBUG = False
 
 def main():
+    parser = OptionParser()
+    parser.add_option("-d", "--debug",
+                      action="store_true", dest="debug", default=False,
+                      help="print debug messages to stdout")
+
+    (options, args) = parser.parse_args()
+    global DEBUG
+    DEBUG = options.debug
+
     search = {
         'hot' : {
             'name' : 'hot',
@@ -36,38 +47,74 @@ def main():
             'website_id' : '03',
             'category_id' : '01',
         },
+        'popular' : {
+            'name' : 'popular',
+            'url' : 'http://s.weibo.com/top/summary?cate=total&key=films',
+            'website_id' : '03',
+            'category_id' : '02',
+        },
+        'person' : {
+            'name' : 'person',
+            'url' : 'http://s.weibo.com/top/summary?cate=total&key=person',
+            'website_id' : '03',
+            'category_id' : '03',
+        },
     }
+
+    # Prepare display and driver for Chrome headless browser
+    display = Display(visible=0, size=(800, 600))
+    display.start()
+    driver = webdriver.Chrome()
+    time.sleep(2)
+    # 等待：   
+    driver.implicitly_wait(30)
+    driver.set_page_load_timeout(30)
+    driver.set_script_timeout(30)
 
     #热搜榜-热点
     getSearch(
+        display,
+        driver,
         search['hot']['name'], 
         search['hot']['url'],
         search['hot']['website_id'],
         search['hot']['category_id']
         )
 
-def getSearch(name, url, website_id, category_id):
-    parser = OptionParser()
-    parser.add_option("-d", "--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="print debug messages to stdout")
-    parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
-                      help="don't print status messages to stdout")
-    parser.add_option("-p", "--page",
-                      dest="page", default=2,
-                      help="don't print status messages to stdout")
+    #热搜榜-名人
+    getSearch(
+        display,
+        driver,
+        search['popular']['name'], 
+        search['popular']['url'],
+        search['popular']['website_id'],
+        search['popular']['category_id']
+        )
 
-    (options, args) = parser.parse_args()
+    #热搜榜-名人
+    getSearch(
+        display,
+        driver,
+        search['person']['name'], 
+        search['person']['url'],
+        search['person']['website_id'],
+        search['person']['category_id']
+        )
+
+    driver.quit()
+    display.stop()
+
+# End of main
+
+def getSearch(display, driver, name, url, website_id, category_id):
+    global DEBUG
     # 使用 Baidu Spider 的 UserAgent,  微博会放行
     # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
     headers = {'User-Agent':'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)'}
-    numberOfPageToCrawl = 2
     weiboUrlBase = url
     resultLists = []
     datetimeTag = datetime.now().isoformat()
 
-    debug = options.debug
     # Debugging file
     filenameBase = 'debug_page'
 
@@ -82,120 +129,90 @@ def getSearch(name, url, website_id, category_id):
     datecol = datetime.now().strftime('%Y%m%d')
     internal_ranking = 0
 
-    for pnum in range(1, numberOfPageToCrawl):
-        weiboUrl = weiboUrlBase + `pnum`
-        outputFileName = filenameBase + `pnum` + '.html'
+    weiboUrl = weiboUrlBase
+    outputFileName = filenameBase + '.html'
+    pageContent = ''
+    print "Crawling %s, url: %s" % (name, url,)
+    try:
+        driver.get(url)
+        time.sleep(7)
+        domHtmlContent = driver.find_element_by_tag_name('html')
+        # get origin html content
+        pageContent = domHtmlContent.get_attribute('innerHTML')
+    except TimeoutException:  
+        print 'Time out after 30 seconds when loading page'  
+        driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
-        # req2 = urllib2.Request(
-        #     url = weiboUrl,
-        #     headers = headers
-        # )
-        # try:
-        #     page = urllib2.urlopen(req2)
-        #     pageContent = page.read()
-        #     # Output to file for debuging
-        #     # This html doc using javascript to load content, so we need to load it into webdriver
-        #     # to get complete html doc
-        #     writeToTempFile(outputFileName, pageContent)
-        # except urllib2.HTTPError, e:
-        #     msg = "'微博热搜榜(%s)'-網頁回应錯誤，快來看看（%s, %s）" % (name, e.code, e.reason,)
-        #     sendNotification(msg)
-        #     print "'微博热搜榜(%s)'-網頁回应錯誤，快來看看（%s, %s）" % (name, e.code, e.reason,)
-        #     return
-        # except urllib2.URLError, e:
-        #     msg = "'微博热搜榜(%s)'-找不到网址(%s)，快來看看（%s）" % (name, weiboUrl, e.reason,)
-        #     sendNotification(msg)
-        #     print "'微博热搜榜(%s)'-找不到网址(%s)，快來看看（%s）" % (name, weiboUrl, e.reason,)
-        #     return
+    if pageContent is None:
+        msg = "'微博热搜榜(%s)'- Browser renderring error，快來看看（%s）" % (name, datetimeTag,)
+        sendNotification(msg)
+        print "'微博热搜榜(%s)'- Browser renderring error，快來看看" % (name,)
+        return            
 
-        driver = webdriver.Chrome()
-        # 等待：   
-        driver.implicitly_wait(30)
-        driver.set_page_load_timeout(30)
-        driver.set_script_timeout(30)
-        try:
-            driver.get(url)
-            time.sleep(10)
-            domHtmlContent = driver.find_element_by_tag_name('html')
-            # get origin html content
-            pageContent = domHtmlContent.get_attribute('innerHTML')
-        except TimeoutException:  
-            print 'Time out after 30 seconds when loading page'  
-            driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
-            driver.quit()
-        except:
-            driver.quit()
+    soup = BeautifulSoup(pageContent, 'lxml')
+    rankLists = soup.find_all('tr', attrs={"action-type":"hover"})
+    print 'Count: %d' % len(rankLists)
+    if len(rankLists) <= 0:
+        msg = "'微博热搜榜(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
+        sendNotification(msg)
+        print "'微博热搜榜(%s)'-網頁解析錯誤，快來看看" % (name,)
+        os._exit(-1)
 
-        # close browser
-        driver.quit()
-
-        # pageContent = page.read()
-        # if debug == True:
-        #     print '[DEBUG] Output file to ', outputFileName
-        #     fw = open(outputFileName, 'w')
-        #     fw.write(pageContent)  
-        #     fw.close()  
-
-        soup = BeautifulSoup(pageContent, 'lxml')
-        rankLists = soup.find_all('tr', attrs={"action-type":"hover"})
-        print 'Count: %d' % len(rankLists)
-        if len(rankLists) <= 0:
-            msg = "'微博热搜榜(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
-            sendNotification(msg)
-            print "'微博热搜榜(%s)'-網頁解析錯誤，快來看看" % (name,)
-            os._exit(-1)
-
-        for i in rankLists:
-            internal_ranking += 1
+    for i in rankLists:
+        internal_ranking += 1
+        if DEBUG:
             print '==================================='
             print i
 
-            ranking = i.find('td', class_='td_01').find('em')
-            if keyword is None:
-                continue
-            else:
-                ranking = ranking.string
+        ranking = i.find('td', class_='td_01').find('em')
+        if keyword is None:
+            continue
+        else:
+            ranking = ranking.string
 
-            keyword = i.find('td', class_='td_02').find('a')
-            if keyword is None:
-                continue
-            else:
-                keyword = keyword.string
+        keyword = i.find('td', class_='td_02').find('a')
+        if keyword is None:
+            continue
+        else:
+            keyword = keyword.string
 
-            search_index = i.find('td', class_='td_03')
-            if search_index is None:
-                continue
-            else:
-                search_index = search_index.string
+        search_index = i.find('td', class_='td_03')
+        if search_index is None:
+            continue
+        else:
+            search_index = search_index.string
 
-            search_trend = i.find('td', class_='td_04').find('span')
-            if search_trend is None:
-                continue
-            else:
-                search_trend = search_trend.string
+        search_trend = i.find('td', class_='td_04').find('span')
+        if search_trend is None:
+            continue
+        else:
+            search_trend = str(search_trend)
 
+        # Extract percentage from td_04
+        recond = re.compile('.*?width:(\d*%).*')
+        search_trend = recond.search(search_trend).group(1)
 
-            if debug:
-                print '==========================='
-                print 'Rank: %s' % ranking
-                print 'Topic: %s' % keyword
-                print '==========================='
+        if DEBUG:
+            print '==================================='
+            print 'Rank: %s' % ranking
+            print 'Topic: %s' % keyword
+            print '==================================='
 
-            # Data Format for each record
-            # website_id              string                                      
-            # category_id             string                                      
-            # ranking                 string                                      
-            # keyword                 string                                      
-            # content                 string                                      
-            # search_index            string                                      
-            # search_trend            string                                      
-            # tag_type                string                                      
-            # type_id                 string                                      
-            # read_times              string                                      
-            # host                    string                                      
-            # datecol                 string 
-            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, datecol,)
-            resultLists.append(data)
+        # Data Format for each record
+        # website_id              string                                      
+        # category_id             string                                      
+        # ranking                 string                                      
+        # keyword                 string                                      
+        # content                 string                                      
+        # search_index            string                                      
+        # search_trend            string                                      
+        # tag_type                string                                      
+        # type_id                 string                                      
+        # read_times              string                                      
+        # host                    string                                      
+        # datecol                 string 
+        data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, datecol,)
+        resultLists.append(data)
 
     # for idx, val in enumerate(resultLists):
     #     print idx+1, val
