@@ -40,28 +40,57 @@ def main():
     global DEBUG
     DEBUG = options.debug
 
+#热门微博排行-综艺类
+weibo_hot_variety||01,00=http://d.weibo.com/102803_ctg1_4688_-_ctg1_4688?from=faxian_hot&mod=fenlei# 
+
+#热门微博排行-明星类
+weibo_hot_star||01,01=http://d.weibo.com/102803_ctg1_4288_-_ctg1_4288?from=faxian_hot&mod=fenlei#
+
+#热门微博排行-电视剧类
+weibo_hot_show||01,02=http://d.weibo.com/102803_ctg1_2488_-_ctg1_2488
+
+#热门微博排行-电影类
+weibo_hot_movie||01,03=http://d.weibo.com/102803_ctg1_3288_-_ctg1_3288?from=faxian_hot&mod=fenlei#
+
+#热门微博排行-动漫类
+weibo_hot_comic||01,04=http://d.weibo.com/102803_ctg1_2388_-_ctg1_2388?from=faxian_hot&mod=fenlei#
+
     faxian = {
+        'variety' : {
+            'name' : 'variety',
+            'url' : 'http://d.weibo.com/102803_ctg1_4688_-_ctg1_4688?page=',
+            'website_id' : '01',
+            'category_id' : '00',
+        },
         'star' : {
             'name' : 'star',
-            'url' : 'http://d.weibo.com/102803_ctg1_4288_-_ctg1_4288?from=faxian_hot&mod=fenlei',
+            'url' : 'http://d.weibo.com/102803_ctg1_4288_-_ctg1_4288?page=',
             'website_id' : '01',
             'category_id' : '01',
         },
-        'popular' : {
-            'name' : 'popular',
-            'url' : 'http://s.weibo.com/top/summary?cate=total&key=films',
+        'show' : {
+            'name' : 'show',
+            'url' : 'http://d.weibo.com/102803_ctg1_2488_-_ctg1_2488?page=',
             'website_id' : '01',
             'category_id' : '02',
         },
-        'person' : {
-            'name' : 'person',
-            'url' : 'http://s.weibo.com/top/summary?cate=total&key=person',
+        'movie' : {
+            'name' : 'movie',
+            'url' : 'http://d.weibo.com/102803_ctg1_3288_-_ctg1_3288?page=',
             'website_id' : '01',
             'category_id' : '03',
+        },
+        'comic' : {
+            'name' : 'comic',
+            'url' : 'http://d.weibo.com/102803_ctg1_2388_-_ctg1_2388?page=',
+            'website_id' : '01',
+            'category_id' : '04',
         },
     }
 
     opts = Options()
+    # 使用 Baidu Spider 的 UserAgent,  微博会放行
+    # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
     opts.add_argument("user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)")
 
     # Prepare display and driver for Chrome headless browser
@@ -74,15 +103,15 @@ def main():
     driver.set_page_load_timeout(30)
     driver.set_script_timeout(30)
 
-    #热搜榜-热点
-    getFaxian(
-        display,
-        driver,
-        faxian['star']['name'], 
-        faxian['star']['url'],
-        faxian['star']['website_id'],
-        faxian['star']['category_id']
-        )
+    for k, v in faxian.items:
+        getFaxian(
+            display,
+            driver,
+            v['name'], 
+            v['url'],
+            v['website_id'],
+            v['category_id']
+            )
 
     # #热搜榜-名人
     # getSearch(
@@ -111,10 +140,8 @@ def main():
 
 def getFaxian(display, driver, name, url, website_id, category_id):
     global DEBUG
-    # 使用 Baidu Spider 的 UserAgent,  微博会放行
-    # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
-    headers = {'User-Agent':'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)'}
-    numberOfPageToCrawl = 2
+    # Get 2 page of hot_weibo
+    numberOfPageToCrawl = 3
     weiboUrlBase = url
     resultLists = []
     datetimeTag = datetime.now().isoformat()
@@ -142,17 +169,17 @@ def getFaxian(display, driver, name, url, website_id, category_id):
         pageContent = ''
         js="window.scrollTo(0, document.body.scrollHeight);"
         try:
-            print "Retrive url..."
-            driver.get(url)
-            print "Waiting..."
+            print "Retrive url: %s" % (weiboUrl,)
+            driver.get(weiboUrl)
+            print "Waiting page ..."
             time.sleep(7)
-            print "Scroll down 1st..."
+            print "Scroll down 1st ..."
             driver.execute_script(js)
             time.sleep(4)
-            print "Scroll down 2nd..."
+            print "Scroll down 2nd ..."
             driver.execute_script(js)
             time.sleep(4)
-            print "Scroll down 3rd..."
+            print "Scroll down 3rd ..."
             driver.execute_script(js)
             time.sleep(4)
             # print "Locate 'load more' button ..."
@@ -293,7 +320,7 @@ def isInt(input):
 def writeToFile(filename, listData):
     if not os.path.exists('output'):
         os.mkdir('output')
-    filename = 'output/weibo_search_' + filename
+    filename = 'output/weibo_hot_' + filename
     with open(filename, 'wb') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
 

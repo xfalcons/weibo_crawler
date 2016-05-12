@@ -71,35 +71,16 @@ def main():
     driver.set_page_load_timeout(30)
     driver.set_script_timeout(30)
 
-    #热搜榜-热点
-    getSearch(
-        display,
-        driver,
-        search['hot']['name'], 
-        search['hot']['url'],
-        search['hot']['website_id'],
-        search['hot']['category_id']
-        )
+    for k, v in search.items():
+        getSearch(
+            display,
+            driver,
+            v['name'], 
+            v['url'],
+            v['website_id'],
+            v['category_id']
+            )
 
-    #热搜榜-名人
-    getSearch(
-        display,
-        driver,
-        search['popular']['name'], 
-        search['popular']['url'],
-        search['popular']['website_id'],
-        search['popular']['category_id']
-        )
-
-    #热搜榜-名人
-    getSearch(
-        display,
-        driver,
-        search['person']['name'], 
-        search['person']['url'],
-        search['person']['website_id'],
-        search['person']['category_id']
-        )
 
     driver.quit()
     display.stop()
@@ -189,7 +170,7 @@ def getSearch(display, driver, name, url, website_id, category_id):
             search_trend = str(search_trend)
 
         # Extract percentage from td_04
-        recond = re.compile('.*?width:(\d*%).*')
+        recond = re.compile('.*?width:(\d*)%.*')
         search_trend = recond.search(search_trend).group(1)
 
         if DEBUG:
