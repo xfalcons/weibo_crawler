@@ -88,7 +88,7 @@ def main():
         display.stop()
     except:
         traceback.print_exc()
-        msg = "'发现热门微博'- Runtime Error. %s" % traceback.print_exc()
+        msg = "'微博热门搜索'- Runtime Error. %s" % traceback.format_exc()
         sendNotification(msg)
 
 # End of main

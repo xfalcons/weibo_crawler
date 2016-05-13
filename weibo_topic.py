@@ -74,7 +74,7 @@ def main():
                 )
     except:
         traceback.print_exc()
-        msg = "'发现热门微博'- Runtime Error. %s" % traceback.print_exc()
+        msg = "'微话题'- Runtime Error. %s" % traceback.format_exc()
         sendNotification(msg)
 
 def getHotTopic(name, url, website_id, category_id):
@@ -237,7 +237,7 @@ def sendNotification(msg):
     c.setopt(pycurl.MAXREDIRS, 3)
     c.setopt(pycurl.SSL_VERIFYPEER, 0)   
     c.setopt(pycurl.SSL_VERIFYHOST, 0)
-    
+
     post_data = {"text":msg}
     # Form data must be provided already urlencoded.
     postfields = urlencode(post_data)
