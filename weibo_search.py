@@ -13,6 +13,7 @@ import hashlib
 import pycurl
 import StringIO
 import os
+import traceback
 from datetime import datetime
 try:
     # python 3
