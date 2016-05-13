@@ -61,29 +61,34 @@ def main():
         },
     }
 
-    # Prepare display and driver for Chrome headless browser
-    display = Display(visible=0, size=(800, 600))
-    display.start()
-    driver = webdriver.Chrome()
-    time.sleep(2)
-    # 等待：   
-    driver.implicitly_wait(30)
-    driver.set_page_load_timeout(30)
-    driver.set_script_timeout(30)
+    try:
+        # Prepare display and driver for Chrome headless browser
+        display = Display(visible=0, size=(800, 600))
+        display.start()
+        driver = webdriver.Chrome()
+        time.sleep(2)
+        # 等待：   
+        driver.implicitly_wait(30)
+        driver.set_page_load_timeout(30)
+        driver.set_script_timeout(30)
 
-    for k, v in search.items():
-        getSearch(
-            display,
-            driver,
-            v['name'], 
-            v['url'],
-            v['website_id'],
-            v['category_id']
-            )
+        for k, v in search.items():
+            getSearch(
+                display,
+                driver,
+                v['name'], 
+                v['url'],
+                v['website_id'],
+                v['category_id']
+                )
 
 
-    driver.quit()
-    display.stop()
+        driver.quit()
+        display.stop()
+    except:
+        traceback.print_exc()
+        msg = "'发现热门微博'- Runtime Error. %s" % traceback.print_exc()
+        sendNotification(msg)
 
 # End of main
 

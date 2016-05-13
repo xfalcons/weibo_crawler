@@ -63,62 +63,18 @@ def main():
         },
     }
 
-    for k, v in hotTopic.items():
-        getHotTopic(
-            v['name'], 
-            v['url'],
-            v['website_id'],
-            v['category_id']
-            )
-
-    # #微话题类（分时间），需要钻取20-100+的分页面
-    # #微话题总排行-24小时
-    # getHotTopic(
-    #     hotTopic['24hour']['name'], 
-    #     hotTopic['24hour']['url'],
-    #     hotTopic['24hour']['website_id'],
-    #     hotTopic['24hour']['category_id']
-    #     )
-
-    # #微话题排行-明星类(最热)
-    # getHotTopic(
-    #     hotTopic['star']['name'], 
-    #     hotTopic['star']['url'],
-    #     hotTopic['star']['website_id'],
-    #     hotTopic['star']['category_id']
-    #     )
-
-    # #微话题排行-综艺类(最热)
-    # getHotTopic(
-    #     hotTopic['variety']['name'], 
-    #     hotTopic['variety']['url'],
-    #     hotTopic['variety']['website_id'],
-    #     hotTopic['variety']['category_id']
-    #     )
-
-    # #微话题排行-电视剧类(最热)
-    # getHotTopic(
-    #     hotTopic['show']['name'], 
-    #     hotTopic['show']['url'],
-    #     hotTopic['show']['website_id'],
-    #     hotTopic['show']['category_id']
-    #     )
-
-    # #微话题排行-电影类(最热)
-    # getHotTopic(
-    #     hotTopic['movie']['name'], 
-    #     hotTopic['movie']['url'],
-    #     hotTopic['movie']['website_id'],
-    #     hotTopic['movie']['category_id']
-    #     )
-
-    # #微话题排行-动漫类(最热)
-    # getHotTopic(
-    #     hotTopic['comic']['name'], 
-    #     hotTopic['comic']['url'],
-    #     hotTopic['comic']['website_id'],
-    #     hotTopic['comic']['category_id']
-    #     )
+    try:
+        for k, v in hotTopic.items():
+            getHotTopic(
+                v['name'], 
+                v['url'],
+                v['website_id'],
+                v['category_id']
+                )
+    except:
+        traceback.print_exc()
+        msg = "'发现热门微博'- Runtime Error. %s" % traceback.print_exc()
+        sendNotification(msg)
 
 def getHotTopic(name, url, website_id, category_id):
     parser = OptionParser()

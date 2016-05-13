@@ -13,6 +13,7 @@ import hashlib
 import pycurl
 import StringIO
 import os
+import traceback
 from datetime import datetime
 try:
     # python 3
@@ -79,47 +80,32 @@ def main():
     opts.add_argument("user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)")
 
     # Prepare display and driver for Chrome headless browser
-    display = Display(visible=0, size=(800, 600))
-    display.start()
-    driver = webdriver.Chrome(chrome_options=opts)
-    time.sleep(2)
-    # 等待：   
-    driver.implicitly_wait(30)
-    driver.set_page_load_timeout(30)
-    driver.set_script_timeout(30)
+    try:
+        display = Display(visible=0, size=(800, 600))
+        display.start()
+        driver = webdriver.Chrome(chrome_options=opts)
+        time.sleep(2)
+        # 等待：   
+        driver.implicitly_wait(30)
+        driver.set_page_load_timeout(30)
+        driver.set_script_timeout(30)
 
-    for k, v in hot.items():
-        getHot(
-            display,
-            driver,
-            v['name'], 
-            v['url'],
-            v['website_id'],
-            v['category_id']
-            )
+        for k, v in hot.items():
+            getHot(
+                display,
+                driver,
+                v['name'], 
+                v['url'],
+                v['website_id'],
+                v['category_id']
+                )
 
-    # #热搜榜-名人
-    # getSearch(
-    #     display,
-    #     driver,
-    #     search['popular']['name'], 
-    #     search['popular']['url'],
-    #     search['popular']['website_id'],
-    #     search['popular']['category_id']
-    #     )
-
-    # #热搜榜-名人
-    # getSearch(
-    #     display,
-    #     driver,
-    #     search['person']['name'], 
-    #     search['person']['url'],
-    #     search['person']['website_id'],
-    #     search['person']['category_id']
-    #     )
-
-    driver.quit()
-    display.stop()
+        driver.quit()
+        display.stop()
+    except:
+        traceback.print_exc()
+        msg = "'发现热门微博'- Runtime Error. %s" % traceback.print_exc()
+        sendNotification(msg)
 
 # End of main
 
@@ -220,7 +206,14 @@ def getHot(display, driver, name, url, website_id, category_id):
             #print i
 
             detail = i.find('div', class_='WB_feed_detail')
-            keyword = detail.find('div', class_='WB_info').find('a')
+            if detail is None:
+                continue
+
+            wb_info = detail.find('div', class_='WB_info')
+            if wb_info is None:
+                continue
+
+            keyword = wb_info.find('a')
             if keyword is None:
                 continue
             else:
@@ -244,6 +237,12 @@ def getHot(display, driver, name, url, website_id, category_id):
                 comment_times = elements.find_all('em')
                 if comment_times is not None:
                     comment_times = comment_times[1].get_text()
+
+            elements = socialinfo.find('span', attrs={'node-type':'like_status'})
+            if elements is not None:
+                comment_times = elements.find('em')
+                if comment_times is not None:
+                    comment_times = comment_times.get_text()
 
             if DEBUG:
                 print '==========================='
