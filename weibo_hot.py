@@ -281,7 +281,9 @@ def sendNotification(msg):
     c.setopt(pycurl.URL, 'https://hooks.pubu.im/services/2p4lk91mvde9h6')
     c.setopt(pycurl.FOLLOWLOCATION, 1)
     c.setopt(pycurl.MAXREDIRS, 3)
-
+    c.setopt(pycurl.SSL_VERIFYPEER, 0)   
+    c.setopt(pycurl.SSL_VERIFYHOST, 0)
+    
     post_data = {"text":msg}
     # Form data must be provided already urlencoded.
     postfields = urlencode(post_data)
