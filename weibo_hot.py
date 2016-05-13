@@ -136,7 +136,6 @@ def getHot(display, driver, name, url, website_id, category_id):
 
     for pnum in range(1, numberOfPageToCrawl):
         weiboUrl = weiboUrlBase + `pnum`
-        outputFileName = filenameBase + `pnum` + '.html'
         pageContent = ''
         js="window.scrollTo(0, document.body.scrollHeight);"
         try:

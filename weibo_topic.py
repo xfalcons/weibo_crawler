@@ -117,7 +117,7 @@ def getHotTopic(name, url, website_id, category_id):
 
     for pnum in range(1, numberOfPageToCrawl):
         weiboUrl = weiboUrlBase + `pnum`
-        outputFileName = filenameBase + `pnum` + '.html'
+        outputFileName = 'debug/' + filenameBase + `pnum` + '.html'
         print 'URL:', weiboUrl
         req2 = urllib2.Request(
             url = weiboUrl,

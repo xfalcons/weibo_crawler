@@ -117,7 +117,6 @@ def getSearch(display, driver, name, url, website_id, category_id):
     internal_ranking = 0
 
     weiboUrl = weiboUrlBase
-    outputFileName = filenameBase + '.html'
     pageContent = ''
     print "Crawling %s, url: %s" % (name, url,)
     try:
