@@ -40,7 +40,7 @@ def main():
     global DEBUG
     DEBUG = options.debug
 
-    faxian = {
+    hot = {
         'variety' : {
             'name' : 'variety',
             'url' : 'http://d.weibo.com/102803_ctg1_4688_-_ctg1_4688?page=',
@@ -88,8 +88,8 @@ def main():
     driver.set_page_load_timeout(30)
     driver.set_script_timeout(30)
 
-    for k, v in faxian.items:
-        getFaxian(
+    for k, v in hot.items():
+        getHot(
             display,
             driver,
             v['name'], 
@@ -123,7 +123,7 @@ def main():
 
 # End of main
 
-def getFaxian(display, driver, name, url, website_id, category_id):
+def getHot(display, driver, name, url, website_id, category_id):
     global DEBUG
     # Get 2 page of hot_weibo
     numberOfPageToCrawl = 3
