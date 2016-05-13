@@ -24,6 +24,9 @@ except ImportError:
 from optparse import OptionParser
 from bs4 import BeautifulSoup
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 def main():
     hotTopic = {
         '24hour' : {

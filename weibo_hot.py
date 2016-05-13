@@ -29,6 +29,8 @@ from pyvirtualdisplay import Display
 import selenium.webdriver.chrome.service as service
 from selenium.webdriver.chrome.options import Options
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
 DEBUG = False
 
 def main():
@@ -283,7 +285,7 @@ def sendNotification(msg):
     c.setopt(pycurl.MAXREDIRS, 3)
     c.setopt(pycurl.SSL_VERIFYPEER, 0)   
     c.setopt(pycurl.SSL_VERIFYHOST, 0)
-    
+
     post_data = {"text":msg}
     # Form data must be provided already urlencoded.
     postfields = urlencode(post_data)
