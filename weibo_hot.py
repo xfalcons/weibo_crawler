@@ -77,22 +77,27 @@ def main():
         },
     }
 
-    opts = Options()
     # 使用 Baidu Spider 的 UserAgent,  微博会放行
     # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
-    opts.add_argument("user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)")
+    useragent = "user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)"
 
     # Prepare display and driver for Chrome headless browser
     try:
         display = Display(visible=0, size=(800, 600))
         display.start()
         [linux_dist, linux_ver, linux_rel] = platform.linux_distribution()
+
         if linux_dist.lower() == 'centos' and linux_ver == '6.2':
-            driver = webdriver.Firefox()
+            profile = webdriver.FirefoxProfile()
+            profile.set_preference("general.useragent.override", useragent)
+            driver = webdriver.Firefox(profile)
         else:
+            opts = Options()
+            opts.add_argument(useragent)
             driver = webdriver.Chrome(chrome_options=opts)
-        time.sleep(2)
+
         # 等待：   
+        time.sleep(2)
         driver.implicitly_wait(30)
         driver.set_page_load_timeout(30)
         driver.set_script_timeout(30)
