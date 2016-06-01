@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-  
   
 import sys  
+import platform
 import urllib  
 import urllib2  
 import cookielib  
