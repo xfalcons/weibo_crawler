@@ -85,7 +85,11 @@ def main():
     try:
         display = Display(visible=0, size=(800, 600))
         display.start()
-        driver = webdriver.Chrome(chrome_options=opts)
+        [linux_dist, linux_ver, linux_rel] = platform.linux_distribution()
+        if linux_dist.lower() == 'centos' and linux_ver == '6.2':
+            driver = webdriver.Firefox()
+        else:
+            driver = webdriver.Chrome(chrome_options=opts)
         time.sleep(2)
         # 等待：   
         driver.implicitly_wait(30)
@@ -189,9 +193,6 @@ def getHot(display, driver, name, url, website_id, category_id):
             sendNotification(msg)
             print "'发现热门微博(%s)'- Browser renderring error，快來看看" % (name,)
             continue            
-
-        # sys.getfilesystemencoding() 
-        pageContent = pageContent.decode('utf-8').encode(sys.getfilesystemencoding()) #转码:避免输出出现乱码 
 
         soup = BeautifulSoup(pageContent, 'lxml')
         rankLists = soup.find_all('div', class_='WB_feed_type')

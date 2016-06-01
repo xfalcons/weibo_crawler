@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-  
   
 import sys  
+import platform
 import urllib  
 import urllib2  
 import cookielib  
@@ -75,7 +76,11 @@ def main():
         # Prepare display and driver for Chrome headless browser
         display = Display(visible=0, size=(800, 600))
         display.start()
-        driver = webdriver.Chrome()
+        [linux_dist, linux_ver, linux_rel] = platform.linux_distribution()
+        if linux_dist.lower() == 'centos' and linux_ver == '6.2':
+            driver = webdriver.Firefox()
+        else:
+            driver = webdriver.Chrome()
         time.sleep(2)
         # 等待：   
         driver.implicitly_wait(30)
@@ -162,9 +167,6 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
             sendNotification(msg)
             print "'微話題(%s)'- Browser renderring error，快來看看" % (name,)
             return            
-
-        # sys.getfilesystemencoding() 
-        pageContent = pageContent.decode('utf-8').encode(sys.getfilesystemencoding()) #转码:避免输出出现乱码 
 
         soup = BeautifulSoup(pageContent, 'lxml')
         rankLists = soup.find_all('li', class_='pt_li')
