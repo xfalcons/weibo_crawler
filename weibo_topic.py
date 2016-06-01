@@ -172,10 +172,10 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
         rankLists = soup.find_all('li', class_='pt_li')
         print 'Count: %d' % len(rankLists)
         if len(rankLists) <= 0:
+            writeToTempFile('topic.html', pageContent)
             msg = "'微話題(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
             sendNotification(msg)
             print "'微話題(%s)'-網頁解析錯誤，快來看看" % (name,)
-            print pageContent
             os._exit(-1)
 
         for i in rankLists:
@@ -295,6 +295,13 @@ def writeToFile(filename, listData):
     filename = 'output/weibo_topic_' + filename
     with open(filename, 'wb') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
+
+def writeToTempFile(filename, content):
+    if not os.path.exists('debug'):
+        os.mkdir('debug')
+    filename = 'debug/' + filename
+    with open(filename, 'wb') as out_file:
+        out_file.write(content)
 
 if __name__ == '__main__':
     main()

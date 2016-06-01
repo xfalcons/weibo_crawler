@@ -146,6 +146,7 @@ def getSearch(display, driver, name, url, website_id, category_id):
     rankLists = soup.find_all('tr', attrs={"action-type":"hover"})
     print 'Count: %d' % len(rankLists)
     if len(rankLists) <= 0:
+        writeToTempFile('search.html', pageContent)
         msg = "'微博热搜榜(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
         sendNotification(msg)
         print "'微博热搜榜(%s)'-網頁解析錯誤，快來看看" % (name,)

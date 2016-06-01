@@ -199,6 +199,7 @@ def getHot(display, driver, name, url, website_id, category_id):
         rankLists = soup.find_all('div', class_='WB_feed_type')
         print 'Count: %d' % len(rankLists)
         if len(rankLists) <= 0:
+            writeToTempFile('hot.html', pageContent)
             msg = "'发现热门微博(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
             sendNotification(msg)
             print "'发现热门微博(%s)'-網頁解析錯誤，快來看看" % (name,)
