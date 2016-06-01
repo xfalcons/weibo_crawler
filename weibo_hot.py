@@ -190,6 +190,9 @@ def getHot(display, driver, name, url, website_id, category_id):
             print "'发现热门微博(%s)'- Browser renderring error，快來看看" % (name,)
             continue            
 
+        # sys.getfilesystemencoding() 
+        pageContent = pageContent.decode('utf-8').encode(sys.getfilesystemencoding()) #转码:避免输出出现乱码 
+
         soup = BeautifulSoup(pageContent, 'lxml')
         rankLists = soup.find_all('div', class_='WB_feed_type')
         print 'Count: %d' % len(rankLists)

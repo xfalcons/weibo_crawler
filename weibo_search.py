@@ -86,7 +86,6 @@ def main():
                 v['category_id']
                 )
 
-
         driver.quit()
         display.stop()
     except:
@@ -137,6 +136,9 @@ def getSearch(display, driver, name, url, website_id, category_id):
         sendNotification(msg)
         print "'微博热搜榜(%s)'- Browser renderring error，快來看看" % (name,)
         return            
+
+    # sys.getfilesystemencoding() 
+    pageContent = pageContent.decode('utf-8').encode(sys.getfilesystemencoding()) #转码:避免输出出现乱码 
 
     soup = BeautifulSoup(pageContent, 'lxml')
     rankLists = soup.find_all('tr', attrs={"action-type":"hover"})

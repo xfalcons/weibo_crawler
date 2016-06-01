@@ -23,6 +23,10 @@ except ImportError:
     from urllib import urlencode
 from optparse import OptionParser
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from pyvirtualdisplay import Display
+import selenium.webdriver.chrome.service as service
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -68,19 +72,36 @@ def main():
     }
 
     try:
+        # Prepare display and driver for Chrome headless browser
+        display = Display(visible=0, size=(800, 600))
+        display.start()
+        driver = webdriver.Chrome()
+        time.sleep(2)
+        # 等待：   
+        driver.implicitly_wait(30)
+        driver.set_page_load_timeout(30)
+        driver.set_script_timeout(30)
+
         for k, v in hotTopic.items():
             getHotTopic(
+                display,
+                driver,
                 v['name'], 
                 v['url'],
                 v['website_id'],
                 v['category_id']
                 )
+
+        driver.quit()
+        display.stop()
     except:
         traceback.print_exc()
         msg = "'微话题'- Runtime Error. %s" % traceback.format_exc()
         sendNotification(msg)
 
-def getHotTopic(name, url, website_id, category_id):
+# End of main
+
+def getHotTopic(display, driver, name, url, website_id, category_id):
     parser = OptionParser()
     parser.add_option("-d", "--debug",
                       action="store_true", dest="debug", default=False,
@@ -95,7 +116,10 @@ def getHotTopic(name, url, website_id, category_id):
     (options, args) = parser.parse_args()
     # 使用 Baidu Spider 的 UserAgent,  微博会放行
     # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
-    headers = {'User-Agent':'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)'}
+    headers = {
+            'User-Agent':'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
+        }
+
     numberOfPageToCrawl = int(options.page) + 1
     weiboUrlBase = url
     resultLists = []
@@ -120,25 +144,28 @@ def getHotTopic(name, url, website_id, category_id):
 
     for pnum in range(1, numberOfPageToCrawl):
         weiboUrl = weiboUrlBase + `pnum`
-        print 'URL:', weiboUrl
-        req2 = urllib2.Request(
-            url = weiboUrl,
-            headers = headers
-        )
-        try:
-            page = urllib2.urlopen(req2)
-        except urllib2.HTTPError, e:
-            msg = "'微話題(%s)'-網頁回应錯誤，快來看看（%s, %s）" % (name, e.code, e.reason,)
-            sendNotification(msg)
-            print "'微話題(%s)'-網頁回应錯誤，快來看看（%s, %s）" % (name, e.code, e.reason,)
-            return
-        except urllib2.URLError, e:
-            msg = "'微話題(%s)'-找不到网址(%s)，快來看看（%s）" % (name, weiboUrl, e.reason,)
-            sendNotification(msg)
-            print "'微話題(%s)'-找不到网址(%s)，快來看看（%s）" % (name, weiboUrl, e.reason,)
-            return
+        pageContent = ''
+        print 'Crawling(%s) : %s' % (name, weiboUrl,)
 
-        pageContent = page.read()
+        try:
+            driver.get(weiboUrl)
+            time.sleep(7)
+            domHtmlContent = driver.find_element_by_tag_name('html')
+            # get origin html content
+            pageContent = domHtmlContent.get_attribute('innerHTML')
+        except TimeoutException:  
+            print 'Time out after 30 seconds when loading page'  
+            driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
+
+        if pageContent is None:
+            msg = "'微話題(%s)'- Browser renderring error，快來看看（%s）" % (name, datetimeTag,)
+            sendNotification(msg)
+            print "'微話題(%s)'- Browser renderring error，快來看看" % (name,)
+            return            
+
+        # sys.getfilesystemencoding() 
+        pageContent = pageContent.decode('utf-8').encode(sys.getfilesystemencoding()) #转码:避免输出出现乱码 
+
         soup = BeautifulSoup(pageContent, 'lxml')
         rankLists = soup.find_all('li', class_='pt_li')
         print 'Count: %d' % len(rankLists)
@@ -146,7 +173,8 @@ def getHotTopic(name, url, website_id, category_id):
             msg = "'微話題(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
             sendNotification(msg)
             print "'微話題(%s)'-網頁解析錯誤，快來看看" % (name,)
-            os._exit()
+            print pageContent
+            os._exit(-1)
 
         for i in rankLists:
             internal_ranking += 1
