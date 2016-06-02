@@ -28,6 +28,7 @@ from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from pyvirtualdisplay import Display
 import selenium.webdriver.chrome.service as service
+from selenium.webdriver.chrome.options import Options
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
