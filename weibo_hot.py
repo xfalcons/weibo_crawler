@@ -146,70 +146,69 @@ def getHot(display, driver, name, url, website_id, category_id):
     comment_times = ''
     datecol = datetime.now().strftime('%Y%m%d')
     internal_ranking = 0
+    retry = 3
 
     for pnum in range(1, numberOfPageToCrawl):
-        weiboUrl = weiboUrlBase + `pnum`
-        pageContent = ''
-        js="window.scrollTo(0, document.body.scrollHeight);"
-        try:
-            print "Retrive url: %s" % (weiboUrl,)
-            driver.get(weiboUrl)
-            print "Waiting page ..."
-            time.sleep(7)
-            print "Scroll down 1st ..."
-            driver.execute_script(js)
-            time.sleep(4)
-            print "Scroll down 2nd ..."
-            driver.execute_script(js)
-            time.sleep(4)
-            print "Scroll down 3rd ..."
-            driver.execute_script(js)
-            time.sleep(4)
-            # print "Locate 'load more' button ..."
-            # loadmore = driver.find_element_by_class_name("WB_cardmore_noborder")
-            # if loadmore is not None:
-            #     print "Got 'load more' button"
-            #     loadmore.click()
-            #     time.sleep(4)
-            # else:
-            #     print "Can NOT got 'load more' button"
+        while retry > 0:
+            weiboUrl = weiboUrlBase + `pnum`
+            pageContent = ''
+            js="window.scrollTo(0, document.body.scrollHeight);"
+            try:
+                print "Retrive url: %s" % (weiboUrl,)
+                driver.get(weiboUrl)
+                print "Waiting page ..."
+                time.sleep(7)
+                print "Scroll down 1st ..."
+                driver.execute_script(js)
+                time.sleep(4)
+                print "Scroll down 2nd ..."
+                driver.execute_script(js)
+                time.sleep(4)
+                print "Scroll down 3rd ..."
+                driver.execute_script(js)
+                time.sleep(4)
 
-            # print "Scroll down 4th..."
-            # driver.execute_script(js)
-            # time.sleep(4)
-            # print "Scroll down 5th..."
-            # driver.execute_script(js)
-            # time.sleep(4)
-            # print "Scroll down 6th..."
-            # driver.execute_script(js)
-            # time.sleep(4)
-            domHtmlContent = driver.find_element_by_tag_name('html')
-            # get origin html content
-            pageContent = domHtmlContent.get_attribute('innerHTML')
-        except TimeoutException:
-            # driver.refresh()
-            # time.sleep(7)
-            print 'Exception'
-            domHtmlContent = driver.find_element_by_tag_name('html')
-            pageContent = domHtmlContent.get_attribute('innerHTML')
-            print 'Time out after 30 seconds when loading page'  
-            driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
+                domHtmlContent = driver.find_element_by_tag_name('html')
+                # get origin html content
+                pageContent = domHtmlContent.get_attribute('innerHTML')
+            except TimeoutException:
+                # driver.refresh()
+                # time.sleep(7)
+                print 'Exception'
+                domHtmlContent = driver.find_element_by_tag_name('html')
+                pageContent = domHtmlContent.get_attribute('innerHTML')
+                print 'Time out after 30 seconds when loading page'  
+                driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
-        if pageContent is None:
-            msg = "[%s]发现热门微博(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
-            sendNotification(msg)
-            print "发现热门微博(%s)- Browser renderring error，快來看看" % (name,)
-            continue            
+            if pageContent is None:
+                if retry == 0:
+                    msg = "[%s]发现热门微博(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                    sendNotification(msg)
+                    print "发现热门微博(%s)- Browser renderring error，快來看看" % (name,)
+                    return
+                else:
+                    retry-=1
+                    print "Retrying after 60s..."
+                    time.sleep(60)
+                    continue
 
-        soup = BeautifulSoup(pageContent, 'lxml')
-        rankLists = soup.find_all('div', class_='WB_feed_type')
-        print 'Count: %d' % len(rankLists)
-        if len(rankLists) <= 0:
-            writeToTempFile('hot.html', pageContent)
-            msg = "[%s]发现热门微博(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
-            sendNotification(msg)
-            print "发现热门微博(%s)-網頁解析錯誤，快來看看" % (name,)
-            os._exit(-1)
+            soup = BeautifulSoup(pageContent, 'lxml')
+            rankLists = soup.find_all('div', class_='WB_feed_type')
+            print 'Count: %d' % len(rankLists)
+            if len(rankLists) <= 0:
+                if retry == 0:
+                    writeToTempFile('hot.html', pageContent)
+                    msg = "[%s]发现热门微博(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                    sendNotification(msg)
+                    print "发现热门微博(%s)-網頁解析錯誤，快來看看" % (name,)
+                    return
+                else:
+                    retry-=1
+                    print "Retrying after 60s..."
+                    time.sleep(60)
+                    continue
+            else:
+                break
 
         for i in rankLists:
             internal_ranking += 1

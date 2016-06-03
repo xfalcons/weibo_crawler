@@ -170,27 +170,36 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
                 print 'Time out after 30 seconds when loading page'  
                 driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
-            if pageContent is None and retry == 0:
-                msg = "[%s]微話題(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
-                sendNotification(msg)
-                print "微話題(%s)- Browser renderring error，快來看看" % (name,)
-                return            
+            if pageContent is None:
+                if retry == 0:
+                    msg = "[%s]微話題(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                    sendNotification(msg)
+                    print "微話題(%s)- Browser renderring error，快來看看" % (name,)
+                    return
+                else:
+                    retry-=1
+                    print "Retrying after 60s..."
+                    time.sleep(60)
+                    continue
 
             soup = BeautifulSoup(pageContent, 'lxml')
             rankLists = soup.find_all('li', class_='pt_li')
             print 'Count: %d' % len(rankLists)
-            if len(rankLists) <= 0 and retry == 0:
-                writeToTempFile('topic.html', pageContent)
-                msg = "[%s]微話題(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
-                sendNotification(msg)
-                print "微話題(%s)-網頁解析錯誤，快來看看" % (name,)
-                return
+            if len(rankLists) <= 0:
+                if retry == 0:
+                    writeToTempFile('topic.html', pageContent)
+                    msg = "[%s]微話題(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                    sendNotification(msg)
+                    print "微話題(%s)-網頁解析錯誤，快來看看" % (name,)
+                    return
+                else:
+                    retry-=1
+                    print "Retrying after 60s..."
+                    time.sleep(60)
+                    continue
             else:
                 break
 
-            retry-=1
-            time.sleep(60)
-            print "Retrying after 60s..."
             # end of while retry
 
         for i in rankLists:

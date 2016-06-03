@@ -131,35 +131,56 @@ def getSearch(display, driver, name, url, website_id, category_id):
     type_id = ''
     datecol = datetime.now().strftime('%Y%m%d')
     internal_ranking = 0
+    retry = 3
 
     weiboUrl = weiboUrlBase
     pageContent = ''
     print "Crawling %s, url: %s" % (name, url,)
-    try:
-        driver.get(url)
-        time.sleep(7)
-        domHtmlContent = driver.find_element_by_tag_name('html')
-        # get origin html content
-        pageContent = domHtmlContent.get_attribute('innerHTML')
-    except TimeoutException:  
-        print 'Time out after 30 seconds when loading page'  
-        driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
-    if pageContent is None:
-        msg = "[%s]微博热搜榜(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
-        sendNotification(msg)
-        print "微博热搜榜(%s)- Browser renderring error，快來看看" % (name,)
-        return            
+    while retry > 0:
+        try:
+            driver.get(url)
+            time.sleep(7)
+            domHtmlContent = driver.find_element_by_tag_name('html')
+            # get origin html content
+            pageContent = domHtmlContent.get_attribute('innerHTML')
+        except TimeoutException:  
+            print 'Time out after 30 seconds when loading page'  
+            driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
-    soup = BeautifulSoup(pageContent, 'lxml')
-    rankLists = soup.find_all('tr', attrs={"action-type":"hover"})
-    print 'Count: %d' % len(rankLists)
-    if len(rankLists) <= 0:
-        writeToTempFile('search.html', pageContent)
-        msg = "[%s]微博热搜榜(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
-        sendNotification(msg)
-        print "微博热搜榜(%s)-網頁解析錯誤，快來看看" % (name,)
-        os._exit(-1)
+        if pageContent is None:
+            if retry == 0:
+                msg = "[%s]微博热搜榜(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                sendNotification(msg)
+                print "微博热搜榜(%s)- Browser renderring error，快來看看" % (name,)
+                return            
+            else:
+                retry-=1
+                print "Retrying after 60s..."
+                time.sleep(60)
+                continue
+
+        soup = BeautifulSoup(pageContent, 'lxml')
+        rankLists = soup.find_all('tr', attrs={"action-type":"hover"})
+        print 'Count: %d' % len(rankLists)
+        if len(rankLists) <= 0:
+            if retry == 0:
+                writeToTempFile('search.html', pageContent)
+                msg = "[%s]微博热搜榜(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                sendNotification(msg)
+                print "微博热搜榜(%s)-網頁解析錯誤，快來看看" % (name,)
+                return
+            else:
+                retry-=1
+                print "Retrying after 60s..."
+                time.sleep(60)
+                continue
+        else:
+            break
+
+        # end of while retry
+
+
 
     for i in rankLists:
         internal_ranking += 1
