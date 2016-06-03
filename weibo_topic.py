@@ -3,6 +3,7 @@
   
 import sys  
 import platform
+import socket
 import urllib  
 import urllib2  
 import cookielib  
@@ -112,7 +113,7 @@ def main():
         display.stop()
     except:
         traceback.print_exc()
-        msg = "'微话题'- Runtime Error. %s" % traceback.format_exc()
+        msg = "[%s]微话题- Runtime Error. %s" % (socket.gethostname(), traceback.format_exc())
         sendNotification(msg)
 
 # End of main
@@ -151,37 +152,46 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
     host = ''
     datecol = datetime.now().strftime('%Y%m%d')
     internal_ranking = 0
+    retry = 3
 
     for pnum in range(1, numberOfPageToCrawl):
-        weiboUrl = weiboUrlBase + `pnum`
-        pageContent = ''
-        print 'Crawling(%s) : %s' % (name, weiboUrl,)
+        while retry > 0:
+            weiboUrl = weiboUrlBase + `pnum`
+            pageContent = ''
+            print 'Crawling(%s) : %s' % (name, weiboUrl,)
 
-        try:
-            driver.get(weiboUrl)
-            time.sleep(7)
-            domHtmlContent = driver.find_element_by_tag_name('html')
-            # get origin html content
-            pageContent = domHtmlContent.get_attribute('innerHTML')
-        except TimeoutException:  
-            print 'Time out after 30 seconds when loading page'  
-            driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
+            try:
+                driver.get(weiboUrl)
+                time.sleep(7)
+                domHtmlContent = driver.find_element_by_tag_name('html')
+                # get origin html content
+                pageContent = domHtmlContent.get_attribute('innerHTML')
+            except TimeoutException:  
+                print 'Time out after 30 seconds when loading page'  
+                driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
-        if pageContent is None:
-            msg = "'微話題(%s)'- Browser renderring error，快來看看（%s）" % (name, datetimeTag,)
-            sendNotification(msg)
-            print "'微話題(%s)'- Browser renderring error，快來看看" % (name,)
-            return            
+            if pageContent is None and retry == 0:
+                msg = "[%s]微話題(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                sendNotification(msg)
+                print "微話題(%s)- Browser renderring error，快來看看" % (name,)
+                return            
 
-        soup = BeautifulSoup(pageContent, 'lxml')
-        rankLists = soup.find_all('li', class_='pt_li')
-        print 'Count: %d' % len(rankLists)
-        if len(rankLists) <= 0:
-            writeToTempFile('topic.html', pageContent)
-            msg = "'微話題(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
-            sendNotification(msg)
-            print "'微話題(%s)'-網頁解析錯誤，快來看看" % (name,)
-            os._exit(-1)
+            soup = BeautifulSoup(pageContent, 'lxml')
+            rankLists = soup.find_all('li', class_='pt_li')
+            print 'Count: %d' % len(rankLists)
+            if len(rankLists) <= 0 and retry == 0:
+                writeToTempFile('topic.html', pageContent)
+                msg = "[%s]微話題(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
+                sendNotification(msg)
+                print "微話題(%s)-網頁解析錯誤，快來看看" % (name,)
+                return
+            else:
+                break
+
+            retry-=1
+            time.sleep(60)
+            print "Retrying after 60s..."
+            # end of while retry
 
         for i in rankLists:
             internal_ranking += 1

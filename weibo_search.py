@@ -3,6 +3,7 @@
   
 import sys  
 import platform
+import socket
 import urllib  
 import urllib2  
 import cookielib  
@@ -106,7 +107,7 @@ def main():
         display.stop()
     except:
         traceback.print_exc()
-        msg = "'微博热门搜索'- Runtime Error. %s" % traceback.format_exc()
+        msg = "[%s]微博热门搜索- Runtime Error. %s" % (socket.gethostname(), traceback.format_exc())
         sendNotification(msg)
 
 # End of main
@@ -145,9 +146,9 @@ def getSearch(display, driver, name, url, website_id, category_id):
         driver.execute_script('window.stop()') #当页面加载时间超过设定时间，通过执行Javascript来stop加载，即可执行后续动作
 
     if pageContent is None:
-        msg = "'微博热搜榜(%s)'- Browser renderring error，快來看看（%s）" % (name, datetimeTag,)
+        msg = "[%s]微博热搜榜(%s)- Browser renderring error，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
         sendNotification(msg)
-        print "'微博热搜榜(%s)'- Browser renderring error，快來看看" % (name,)
+        print "微博热搜榜(%s)- Browser renderring error，快來看看" % (name,)
         return            
 
     soup = BeautifulSoup(pageContent, 'lxml')
@@ -155,9 +156,9 @@ def getSearch(display, driver, name, url, website_id, category_id):
     print 'Count: %d' % len(rankLists)
     if len(rankLists) <= 0:
         writeToTempFile('search.html', pageContent)
-        msg = "'微博热搜榜(%s)'-網頁解析錯誤，快來看看（%s）" % (name, datetimeTag,)
+        msg = "[%s]微博热搜榜(%s)-網頁解析錯誤，快來看看（%s）" % (socket.gethostname(), name, datetimeTag,)
         sendNotification(msg)
-        print "'微博热搜榜(%s)'-網頁解析錯誤，快來看看" % (name,)
+        print "微博热搜榜(%s)-網頁解析錯誤，快來看看" % (name,)
         os._exit(-1)
 
     for i in rankLists:
