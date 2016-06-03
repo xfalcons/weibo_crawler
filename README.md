@@ -30,10 +30,10 @@
 底下示范 weibo_crawler 环境
 
 
-		$ virtualenv weibo_crawler
+		[/home/kevin_luo]$ virtualenv weibo_crawler
 		New python executable in weibo_crawler/bin/python
 		Installing setuptools, pip...done.
-		$/recall/code# 
+		[/home/kevin_luo]$ 
 
 很简单，就是virtualenv 环境名称[自定义的名称，自己喜欢什么就写什么]
 
@@ -43,7 +43,7 @@
 
 我们先进入到该目录下：
 
-		$ cd weibo_crawler/
+		[/home/kevin_luo]$ cd weibo_crawler/
 
 然后启动
 
