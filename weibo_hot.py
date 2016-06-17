@@ -81,6 +81,7 @@ def main():
     # 使用 Baidu Spider 的 UserAgent,  微博会放行
     # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
     useragent = "user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)"
+    removeFile()
 
     # Prepare display and driver for Chrome headless browser
     try:
@@ -137,18 +138,18 @@ def getHot(display, driver, name, url, website_id, category_id):
     ranking = ''
     keyword = ''       
     content = ''
-    search_index = ''
-    search_trend = ''
-    tag_type = ''
-    type_id = ''
+    search_index = 'null'
+    search_trend = 'null'
+    tag_type = 'null'
+    type_id = 'null'
     like_times = ''
     forward_times = ''
     comment_times = ''
     datecol = datetime.now().strftime('%Y%m%d')
-    internal_ranking = 0
     retry = 3
 
     for pnum in range(1, numberOfPageToCrawl):
+        internal_ranking = 0
         while retry > 0:
             weiboUrl = weiboUrlBase + `pnum`
             pageContent = ''
@@ -250,11 +251,12 @@ def getHot(display, driver, name, url, website_id, category_id):
                 if comment_times is not None:
                     comment_times = comment_times[1].get_text()
 
-            elements = socialinfo.find('span', attrs={'node-type':'like_status'})
+            elements_li = socialinfo.find_all('li')
+            elements = elements_li[3]
             if elements is not None:
-                comment_times = elements.find('em')
-                if comment_times is not None:
-                    comment_times = comment_times.get_text()
+                like_times = elements.find('em')
+                if like_times is not None:
+                    like_times = like_times.get_text()
 
             if DEBUG:
                 print '==========================='
@@ -263,6 +265,7 @@ def getHot(display, driver, name, url, website_id, category_id):
                 print 'content: %s' % content
                 print 'Forward: %s' % forward_times
                 print 'Comment: %s' % comment_times                
+                print 'Like: %s' % like_times                
                 print '==========================='
 
             # Data Format for each record
@@ -279,14 +282,18 @@ def getHot(display, driver, name, url, website_id, category_id):
             # forward_times           string                                      
             # comment_times           string                                      
             # datecol                 string 
-            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, like_times, forward_times, comment_times, datecol,)
+
+            # Format ranking to page-ranking like '01-03'
+            ranking = str(pnum).zfill(2) + '-' + str(ranking).zfill(2)
+
+            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, like_times, forward_times, comment_times,)
             resultLists.append(data)
 
     for rec in resultLists:
         print rec
 
     # write result set to file
-    writeToFile(name, resultLists)
+    writeToFile(resultLists)
 
 # 將錯誤訊息，回報到 datainside 的瀑布裡，通知相關人員處理
 def sendNotification(msg):
@@ -315,12 +322,24 @@ def isInt(input):
         return False
     return True
 
-def writeToFile(filename, listData):
+def writeToFile(listData):
     if not os.path.exists('output'):
         os.mkdir('output')
-    filename = 'output/weibo_hot_' + filename
-    with open(filename, 'wb') as out_file:
+    filename = 'output/weibo_hot'
+    with open(filename, 'a') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
+
+def removeFile():
+    if not os.path.exists('output'):
+        os.path.mkdir('output')
+    filename = 'output/weibo_hot'
+    ## check if a file exists on disk ##
+    ## if exists, delete it else show message on screen ##
+    if os.path.exists(filename):
+        try:
+            os.remove(filename)
+        except OSError, e:
+            print ("Error: %s - %s." % (e.filename,e.strerror))
 
 def writeToTempFile(filename, content):
     if not os.path.exists('debug'):
