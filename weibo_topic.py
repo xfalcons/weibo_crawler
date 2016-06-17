@@ -77,6 +77,7 @@ def main():
     # 使用 Baidu Spider 的 UserAgent,  微博会放行
     # headers = {'User-Agent':'Mozilla/5.0 (X11; Linux i686; rv:8.0) Gecko/20100101 Firefox/8.0 Chrome/20.0.1132.57 Safari/536.11'}  
     useragent = "user-agent=Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)"
+    removeFile()
 
     try:
         # Prepare display and driver for Chrome headless browser
@@ -144,17 +145,17 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
     ranking = ''
     keyword = ''       
     content = ''
-    search_index = ''
-    search_trend = ''
-    tag_type = ''
-    type_id = ''
-    read_times = ''
-    host = ''
+    search_index = 'null'
+    search_trend = 'null'
+    tag_type = 'null'
+    type_id = 'null'
+    read_times = 'null'
+    host = 'null'
     datecol = datetime.now().strftime('%Y%m%d')
-    internal_ranking = 0
-    retry = 3
+    retry = 5
 
     for pnum in range(1, numberOfPageToCrawl):
+        internal_ranking = 0
         while retry > 0:
             weiboUrl = weiboUrlBase + `pnum`
             pageContent = ''
@@ -252,7 +253,7 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
             if host is not None:
                 host = host.string.strip()
             else:
-                host = ''
+                host = 'null'
 
             if debug:
                 print '==========================='
@@ -275,7 +276,12 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
             # read_times              string                                      
             # host                    string                                      
             # datecol                 string 
-            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, read_times, host, datecol,)
+
+            # Format ranking to page-ranking like '01-03'
+            ranking = str(pnum).zfill(2) + '-' + str(ranking).zfill(2)
+            search_index = read_times
+
+            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, read_times, host,)
             resultLists.append(data)
 
     # for idx, val in enumerate(resultLists):
@@ -284,7 +290,7 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
         print rec
 
     # write result set to file
-    writeToFile(name, resultLists)
+    writeToFile(resultLists)
 
 # 將錯誤訊息，回報到 datainside 的瀑布裡，通知相關人員處理
 def sendNotification(msg):
@@ -313,12 +319,24 @@ def isInt(input):
         return False
     return True
 
-def writeToFile(filename, listData):
+def writeToFile(listData):
     if not os.path.exists('output'):
         os.path.mkdir('output')
-    filename = 'output/weibo_topic_' + filename
-    with open(filename, 'wb') as out_file:
+    filename = 'output/weibo_topic'
+    with open(filename, 'a') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
+
+def removeFile():
+    if not os.path.exists('output'):
+        os.path.mkdir('output')
+    filename = 'output/weibo_topic'
+    ## check if a file exists on disk ##
+    ## if exists, delete it else show message on screen ##
+    if os.path.exists(filename):
+        try:
+            os.remove(filename)
+        except OSError, e:
+            print ("Error: %s - %s." % (e.filename,e.strerror))
 
 def writeToTempFile(filename, content):
     if not os.path.exists('debug'):
