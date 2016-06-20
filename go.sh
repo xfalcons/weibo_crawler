@@ -15,3 +15,7 @@ fi
 ./weibo_topic.py --debug --page 10
 ./weibo_hot.py --debug
 ./weibo_search.py --debug
+
+# Force to finish firefox process to avoid resouces occupied.
+sleep 30
+ps auxwww | grep -i firefox | grep -v grep | awk '{print $2}' | xargs kill -9
