@@ -252,22 +252,27 @@ def getHot(display, driver, name, url, website_id, category_id):
                     comment_times = comment_times[1].get_text()
 
             elements_li = socialinfo.find_all('li')
-            elements = elements_li[3]
-            if elements is not None:
-                like_times = elements.find('em')
-                if like_times is not None:
-                    like_times = like_times.get_text()
+            if elements_li is not None:
+                try:
+                    elements = elements_li[3]
+                    if elements is not None:
+                        like_times = elements.find('em')
+                        if like_times is not None:
+                            like_times = like_times.get_text()
+                except IndexError:
+                    continue
 
             if DEBUG:
                 print '==========================='
                 print 'Rank: %s' % ranking
                 print 'Topic: %s' % keyword
                 print 'content: %s' % content
-                print 'Forward: %s' % forward_times
                 print 'Comment: %s' % comment_times                
                 print 'Like: %s' % like_times                
+                print 'Forward: %s' % forward_times
                 print '==========================='
 
+            sys.exit(1)
             # Data Format for each record
             # website_id              string                                      
             # category_id             string                                      
@@ -278,15 +283,15 @@ def getHot(display, driver, name, url, website_id, category_id):
             # search_trend            string                                      
             # tag_type                string                                      
             # type_id                 string                                      
+            # comment_times           string                                      
             # like_times              string                                      
             # forward_times           string                                      
-            # comment_times           string                                      
             # datecol                 string 
 
             # Format ranking to page-ranking like '01-03'
             ranking = str(pnum).zfill(2) + '-' + str(ranking).zfill(2)
 
-            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, like_times, forward_times, comment_times,)
+            data = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (website_id, category_id, ranking, keyword, content, search_index, search_trend, tag_type, type_id, comment_times, like_times, forward_times,)
             resultLists.append(data)
 
     for rec in resultLists:
