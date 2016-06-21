@@ -234,7 +234,7 @@ def getHot(display, driver, name, url, website_id, category_id):
 
             content = detail.find('div', class_='WB_text')
             if content is not None:
-                content = content.get_text()
+                content = content.get_text().strip().replace('\n', ' ').replace('\r', ' ')
 
             socialinfo = i.find('div', class_='WB_feed_handle')
 
@@ -272,7 +272,6 @@ def getHot(display, driver, name, url, website_id, category_id):
                 print 'Forward: %s' % forward_times
                 print '==========================='
 
-            sys.exit(1)
             # Data Format for each record
             # website_id              string                                      
             # category_id             string                                      
@@ -333,6 +332,7 @@ def writeToFile(listData):
     filename = 'output/weibo_hot'
     with open(filename, 'a') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
+        out_file.write("\n")
 
 def removeFile():
     if not os.path.exists('output'):

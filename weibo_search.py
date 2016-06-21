@@ -190,19 +190,19 @@ def getSearch(display, driver, name, url, website_id, category_id):
         if keyword is None:
             continue
         else:
-            ranking = ranking.string
+            ranking = ranking.string.strip()
 
         keyword = i.find('td', class_='td_02').find('a')
         if keyword is None:
             continue
         else:
-            keyword = keyword.string
+            keyword = keyword.string.strip()
 
         search_index = i.find('td', class_='td_03')
         if search_index is None:
             continue
         else:
-            search_index = search_index.string
+            search_index = search_index.string.strip()
 
         search_trend = i.find('td', class_='td_04').find('span')
         if search_trend is None:
@@ -277,6 +277,7 @@ def writeToFile(listData):
     filename = 'output/weibo_search'
     with open(filename, 'a') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
+        out_file.write("\n")
 
 def removeFile():
     if not os.path.exists('output'):

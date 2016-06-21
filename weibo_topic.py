@@ -231,9 +231,9 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
             # Get subtitle. This data could be omit if it doesn't exist
             content = i.find('div', class_='subtitle')
             if content is not None:
-                content = content.string.strip()
+                content = content.string.strip().replace('\n', ' ').replace('\r', ' ')
             else:
-                content = ''
+                content = 'null'
 
             keyword = i.find('div', class_='pic_box').find('img').get('alt')
             if keyword is None:
@@ -246,7 +246,7 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
             read_times = subinfo.find('span', class_='number')
             if read_times is None:
                 continue
-            read_times = read_times.string
+            read_times = read_times.string.strip()
 
             # Get host from subinfo
             host = subinfo.find('a')
@@ -325,6 +325,7 @@ def writeToFile(listData):
     filename = 'output/weibo_topic'
     with open(filename, 'a') as out_file:
         out_file.write(("\n".join(listData).encode('UTF-8')))
+        out_file.write("\n")
 
 def removeFile():
     if not os.path.exists('output'):
