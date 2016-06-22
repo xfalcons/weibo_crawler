@@ -158,16 +158,16 @@ def getHot(display, driver, name, url, website_id, category_id):
                 print "Retrive url: %s" % (weiboUrl,)
                 driver.get(weiboUrl)
                 print "Waiting page ..."
-                time.sleep(7)
+                time.sleep(10)
                 print "Scroll down 1st ..."
                 driver.execute_script(js)
-                time.sleep(4)
+                time.sleep(10)
                 print "Scroll down 2nd ..."
                 driver.execute_script(js)
-                time.sleep(4)
+                time.sleep(10)
                 print "Scroll down 3rd ..."
                 driver.execute_script(js)
-                time.sleep(4)
+                time.sleep(10)
 
                 domHtmlContent = driver.find_element_by_tag_name('html')
                 # get origin html content
