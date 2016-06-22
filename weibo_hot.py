@@ -142,9 +142,9 @@ def getHot(display, driver, name, url, website_id, category_id):
     search_trend = 'null'
     tag_type = 'null'
     type_id = 'null'
-    like_times = ''
-    forward_times = ''
-    comment_times = ''
+    like_times = 0
+    forward_times = 0
+    comment_times = 0
     datecol = datetime.now().strftime('%Y%m%d')
     retry = 3
 
@@ -244,12 +244,16 @@ def getHot(display, driver, name, url, website_id, category_id):
                 forward_times = elements.find_all('em')
                 if forward_times is not None:
                     forward_times = forward_times[1].get_text()
+                    if isInt(forward_times) == False:
+                        forward_times = 0
 
             elements = socialinfo.find('span', attrs={'node-type':'comment_btn_text'})
             if elements is not None:
                 comment_times = elements.find_all('em')
                 if comment_times is not None:
                     comment_times = comment_times[1].get_text()
+                    if isInt(comment_times) == False:
+                        comment_times = 0
 
             elements_li = socialinfo.find_all('li')
             if elements_li is not None:
@@ -259,6 +263,8 @@ def getHot(display, driver, name, url, website_id, category_id):
                         like_times = elements.find('em')
                         if like_times is not None:
                             like_times = like_times.get_text()
+                            if isInt(like_times) == False:
+                                like_times = 0
                 except IndexError:
                     continue
 
