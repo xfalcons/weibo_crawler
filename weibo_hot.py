@@ -85,26 +85,26 @@ def main():
 
     # Prepare display and driver for Chrome headless browser
     try:
-        display = Display(visible=0, size=(800, 600))
-        display.start()
-        [linux_dist, linux_ver, linux_rel] = platform.linux_distribution()
-
-        if linux_dist.lower() == 'centos' and linux_ver == '6.2':
-            profile = webdriver.FirefoxProfile()
-            profile.set_preference("general.useragent.override", useragent)
-            driver = webdriver.Firefox(profile)
-        else:
-            opts = Options()
-            opts.add_argument(useragent)
-            driver = webdriver.Chrome(chrome_options=opts)
-
-        # 等待：   
-        time.sleep(2)
-        driver.implicitly_wait(30)
-        driver.set_page_load_timeout(30)
-        driver.set_script_timeout(30)
-
         for k, v in hot.items():
+            display = Display(visible=0, size=(800, 600))
+            display.start()
+            [linux_dist, linux_ver, linux_rel] = platform.linux_distribution()
+
+            if linux_dist.lower() == 'centos' and linux_ver == '6.2':
+                profile = webdriver.FirefoxProfile()
+                profile.set_preference("general.useragent.override", useragent)
+                driver = webdriver.Firefox(profile)
+            else:
+                opts = Options()
+                opts.add_argument(useragent)
+                driver = webdriver.Chrome(chrome_options=opts)
+
+            # 等待：   
+            time.sleep(2)
+            driver.implicitly_wait(30)
+            driver.set_page_load_timeout(30)
+            driver.set_script_timeout(30)
+
             getHot(
                 display,
                 driver,
@@ -114,8 +114,8 @@ def main():
                 v['category_id']
                 )
 
-        driver.quit()
-        display.stop()
+            driver.quit()
+            display.stop()
     except:
         traceback.print_exc()
         msg = "[%s]发现热门微博- Runtime Error. %s" % (socket.gethostname(), traceback.format_exc())
