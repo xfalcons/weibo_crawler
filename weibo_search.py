@@ -187,7 +187,7 @@ def getSearch(display, driver, name, url, website_id, category_id):
         internal_ranking += 1
 
         ranking = i.find('td', class_='td_01').find('em')
-        if keyword is None:
+        if ranking is None:
             continue
         else:
             ranking = ranking.string.strip()
@@ -197,6 +197,7 @@ def getSearch(display, driver, name, url, website_id, category_id):
             continue
         else:
             keyword = keyword.string.strip()
+            keyword = keyword.replace("\t", "").replace(" ", "")
 
         search_index = i.find('td', class_='td_03')
         if search_index is None:

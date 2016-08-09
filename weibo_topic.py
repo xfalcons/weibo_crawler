@@ -238,6 +238,8 @@ def getHotTopic(display, driver, name, url, website_id, category_id):
             keyword = i.find('div', class_='pic_box').find('img').get('alt')
             if keyword is None:
                 continue
+            else:
+                keyword = keyword.replace("\t", "").replace(" ", "")
 
             subinfo = i.find('div', class_='subinfo')
             if subinfo is None:

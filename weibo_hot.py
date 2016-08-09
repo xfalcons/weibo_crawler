@@ -231,6 +231,7 @@ def getHot(display, driver, name, url, website_id, category_id):
                 continue
             else:
                 keyword = keyword.get_text().strip()
+                keyword = keyword.replace("\t", "").replace(" ", "")
 
             content = detail.find('div', class_='WB_text')
             if content is not None:
